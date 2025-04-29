@@ -1,4 +1,4 @@
-# Welcome to your Lovable project
+# Bienvenue sur point de vente snack fes inn
 
 ## Project info
 
