@@ -1,26 +1,26 @@
-# node & build
+# 📦 Dossiers à ne jamais tracker
 node_modules/
 dist/
 .vite/
+.vscode/
+cafe-facture-magie/   # ✅ dossier local cassé à ignorer
 
-# system
+# ⚙️ Fichiers système
 .DS_Store
 Thumbs.db
 
-# VS Code
-.vscode/
-
-# logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-
-# OS
+# 🐞 Fichiers de log
 *.log
 *.tmp
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
 
-# environment files
+# 🔐 Fichiers d’environnement (API keys, config locale)
 .env
 .env.*.local
-cafe-facture-magie/
+
+# ⚠️ Mac/Windows
+*.swp
+ehthumbs.db
+Desktop.ini
