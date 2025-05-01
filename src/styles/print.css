@@ -1,0 +1,56 @@
+
+/* Styles d'impression pour différents formats */
+@media print {
+  /* Styles généraux pour l'impression */
+  body {
+    margin: 0;
+    padding: 0;
+    background-color: white;
+    font-family: Arial, sans-serif;
+  }
+  
+  /* Cache les éléments qui ne doivent pas être imprimés */
+  button, .no-print, nav, header, footer {
+    display: none !important;
+  }
+  
+  /* Format standard A4 pour les rapports */
+  .print-a4 {
+    width: 210mm;
+    min-height: 297mm;
+    padding: 10mm;
+    margin: 0 auto;
+  }
+  
+  /* Format petit ticket pour les factures */
+  .print-ticket {
+    width: 80mm;
+    font-size: 12px;
+    padding: 5mm;
+    margin: 0 auto;
+  }
+  
+  /* Styles pour les tableaux dans les impressions */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  th, td {
+    padding: 4px;
+    text-align: left;
+    border-bottom: 1px dotted #ddd;
+  }
+  
+  /* Titre et en-têtes pour impression */
+  .print-header {
+    text-align: center;
+    margin-bottom: 10mm;
+  }
+  
+  .print-footer {
+    text-align: center;
+    margin-top: 10mm;
+    font-size: 10px;
+  }
+}

@@ -220,11 +220,70 @@ const SalesReportPage = () => {
   const handlePrint = (elementId: string) => {
     const printContent = document.getElementById(elementId);
     if (printContent) {
-      const originalContents = document.body.innerHTML;
-      document.body.innerHTML = printContent.innerHTML;
-      window.print();
-      document.body.innerHTML = originalContents;
-      window.location.reload();
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        toast({
+          title: "Erreur",
+          description: "Veuillez autoriser les popups pour l'impression",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Rapport</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              margin: 0;
+              padding: 20px;
+            }
+            .print-a4 {
+              width: 210mm;
+              padding: 10mm;
+              margin: 0 auto;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-bottom: 20px;
+            }
+            th, td {
+              padding: 8px;
+              text-align: left;
+              border-bottom: 1px solid #ddd;
+            }
+            th {
+              background-color: #f2f2f2;
+              font-weight: bold;
+            }
+            h1, h2 {
+              margin-bottom: 16px;
+            }
+            .text-center {
+              text-align: center;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="print-a4">
+            <h1 class="text-center">Moni_Point de Vente</h1>
+            ${printContent.innerHTML}
+          </div>
+          <script>
+            window.onload = function() {
+              window.print();
+              setTimeout(function() { window.close(); }, 500);
+            };
+          </script>
+        </body>
+        </html>
+      `);
+      
+      printWindow.document.close();
     }
   };
   
@@ -242,77 +301,125 @@ const SalesReportPage = () => {
     const closeDate = new Date(reportData.closeDate);
     const quantities = calculateTotalQuantities(reportData.orders || []);
     
-    const reportElement = document.createElement('div');
-    reportElement.id = 'daily-close-report';
-    reportElement.style.display = 'none';
-    reportElement.setAttribute('data-invoice', 'true');
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      toast({
+        title: "Erreur",
+        description: "Veuillez autoriser les popups pour l'impression",
+        variant: "destructive",
+      });
+      return;
+    }
     
-    reportElement.innerHTML = `
-      <div class="p-4">
-        <h1 class="text-xl font-bold text-center mb-4">Rapport de Clôture Journalière</h1>
-        <p class="text-center mb-4">Moni_Point de Vente</p>
-        <p class="text-center mb-4">Date: ${closeDate.toLocaleDateString()} - Heure: ${closeDate.toLocaleTimeString()}</p>
-        
-        <div class="mb-4">
-          <h2 class="text-lg font-semibold mb-2">Résumé des ventes</h2>
-          <p>Chiffre d'affaires total: ${formatCurrency(reportData.summary?.totalRevenue || 0)}</p>
-          <p>Nombre de commandes: ${reportData.summary?.orderCount || 0}</p>
-        </div>
-        
-        <div class="mb-4">
-          <h2 class="text-lg font-semibold mb-2">Détail des articles vendus</h2>
-          <table border="1" cellpadding="8" style="width:100%; border-collapse: collapse;">
-            <tr>
-              <th style="text-align:left">Article</th>
-              <th style="text-align:right">Quantité</th>
-            </tr>
-            ${quantities.map((item) => `
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Rapport de Clôture</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+          }
+          .print-a4 {
+            width: 210mm;
+            padding: 10mm;
+            margin: 0 auto;
+          }
+          table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+          }
+          th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+          }
+          th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+          }
+          h1, h2 {
+            margin-bottom: 16px;
+          }
+          .text-center {
+            text-align: center;
+          }
+          .mb-4 {
+            margin-bottom: 16px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="print-a4">
+          <h1 class="text-center">Rapport de Clôture Journalière</h1>
+          <p class="text-center mb-4">Moni_Point de Vente</p>
+          <p class="text-center mb-4">Date: ${closeDate.toLocaleDateString()} - Heure: ${closeDate.toLocaleTimeString()}</p>
+          
+          <div class="mb-4">
+            <h2>Résumé des ventes</h2>
+            <p>Chiffre d'affaires total: ${formatCurrency(reportData.summary?.totalRevenue || 0)}</p>
+            <p>Nombre de commandes: ${reportData.summary?.orderCount || 0}</p>
+          </div>
+          
+          <div class="mb-4">
+            <h2>Détail des articles vendus</h2>
+            <table>
               <tr>
-                <td style="text-align:left">${item.name}</td>
-                <td style="text-align:right">${item.quantity}</td>
+                <th style="text-align:left">Article</th>
+                <th style="text-align:right">Quantité</th>
               </tr>
-            `).join('')}
-          </table>
-        </div>
-        
-        <div>
-          <h2 class="text-lg font-semibold mb-2">Transactions du jour</h2>
-          <table border="1" cellpadding="8" style="width:100%; border-collapse: collapse;">
-            <tr>
-              <th style="text-align:left">Facture</th>
-              <th style="text-align:left">Table</th>
-              <th style="text-align:right">Montant</th>
-              <th style="text-align:left">Mode</th>
-            </tr>
-            ${(reportData.transactions || []).map((tx: any) => `
+              ${quantities.map((item) => `
+                <tr>
+                  <td style="text-align:left">${item.name}</td>
+                  <td style="text-align:right">${item.quantity}</td>
+                </tr>
+              `).join('')}
+            </table>
+          </div>
+          
+          <div>
+            <h2>Transactions du jour</h2>
+            <table>
               <tr>
-                <td style="text-align:left">${tx.invoiceNumber}</td>
-                <td style="text-align:left">${tx.tableNumber || '-'}</td>
-                <td style="text-align:right">${formatCurrency(tx.totalAmount)}</td>
-                <td style="text-align:left">${
-                  tx.paymentMethod === 'card' ? 'Carte' : 
-                  tx.paymentMethod === 'cash' ? 'Espèces' :
-                  tx.paymentMethod === 'room_transfer' ? 'Chambre' :
-                  tx.paymentMethod === 'free' ? 'Gratuité' : 'Autre'
-                }</td>
+                <th style="text-align:left">Facture</th>
+                <th style="text-align:left">Table</th>
+                <th style="text-align:right">Montant</th>
+                <th style="text-align:left">Mode</th>
               </tr>
-            `).join('')}
-          </table>
+              ${(reportData.transactions || []).map((tx) => `
+                <tr>
+                  <td style="text-align:left">${tx.invoiceNumber}</td>
+                  <td style="text-align:left">${tx.tableNumber || '-'}</td>
+                  <td style="text-align:right">${formatCurrency(tx.totalAmount)}</td>
+                  <td style="text-align:left">${
+                    tx.paymentMethod === 'card' ? 'Carte' : 
+                    tx.paymentMethod === 'cash' ? 'Espèces' :
+                    tx.paymentMethod === 'room_transfer' ? 'Chambre' :
+                    tx.paymentMethod === 'free' ? 'Gratuité' : 'Autre'
+                  }</td>
+                </tr>
+              `).join('')}
+            </table>
+          </div>
+          
+          <div class="text-center" style="margin-top: 30px;">
+            <p>*** Fin du rapport ***</p>
+          </div>
         </div>
-        
-        <div class="mt-4 text-center">
-          <p>*** Fin du rapport ***</p>
-        </div>
-      </div>
-    `;
+        <script>
+          window.onload = function() {
+            window.print();
+            setTimeout(function() { window.close(); }, 500);
+          };
+        </script>
+      </body>
+      </html>
+    `);
     
-    document.body.appendChild(reportElement);
-    
-    const originalContents = document.body.innerHTML;
-    document.body.innerHTML = reportElement.innerHTML;
-    window.print();
-    document.body.innerHTML = originalContents;
-    window.location.reload();
+    printWindow.document.close();
   };
 
   return (

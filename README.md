@@ -1,58 +1,33 @@
-# Welcome to your Lovable project
 
-## Project info
+# Moni_Point de Vente
 
-**URL**: https://lovable.dev/projects/eb3096df-a925-41f2-803f-2e492ac32115
+## Informations sur le projet
 
-## How can I edit this code?
+Application de point de vente pour cafés et restaurants avec gestion des factures et rapports.
 
-There are several ways of editing your application.
+## Comment cloner et exécuter ce projet
 
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/eb3096df-a925-41f2-803f-2e492ac32115) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+Pour cloner et exécuter ce projet sur votre PC de bureau, suivez ces étapes:
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# Étape 1: Cloner le dépôt Git
+git clone <URL_DU_PROJET>
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Étape 2: Naviguer vers le répertoire du projet
+cd <NOM_DU_PROJET>
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Étape 3: Installer les dépendances nécessaires
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Étape 4: Lancer le serveur de développement
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+L'application sera accessible à l'adresse : http://localhost:8080
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Technologies utilisées
 
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
+Ce projet est construit avec:
 
 - Vite
 - TypeScript
@@ -60,14 +35,26 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
-## How can I deploy this project?
+## Fonctionnalités principales
 
-Simply open [Lovable](https://lovable.dev/projects/eb3096df-a925-41f2-803f-2e492ac32115) and click on Share -> Publish.
+- Gestion des produits et catégories
+- Création et gestion des factures
+- Sauvegarde automatique des factures en cours
+- Rapports de ventes journaliers
+- Clôture journalière avec rapport détaillé
+- Impression de tickets au format 80mm et rapports au format A4
 
-## Can I connect a custom domain to my Lovable project?
+## Formats d'impression
 
-Yes, you can!
+- **Factures**: Format ticket 80mm x 150mm
+- **Rapports et main courante**: Format A4 standard
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## Comment déployer ce projet
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Pour déployer ce projet sur un serveur web, utilisez la commande:
+
+```sh
+npm run build
+```
+
+Les fichiers générés se trouveront dans le répertoire `dist` et pourront être déployés sur n'importe quel serveur web.
