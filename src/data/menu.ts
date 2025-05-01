@@ -1,3 +1,4 @@
+
 import { Product, Category } from '@/types';
 
 export let categories: Category[] = [
@@ -63,6 +64,7 @@ export let products: Product[] = [
   { id: 'v6', name: 'RIMAL ROUGE 75CL', price: 100.00, category: 'vins', description: 'Rimal rouge 75cl' },
   { id: 'v7', name: 'SAHARI RESERVE ROUGE 1/2', price: 140.00, category: 'vins', description: 'Sahari réserve rouge 37.5cl' },
   { id: 'v8', name: 'SAHARI RESERVE ROUGE 3/4', price: 270.00, category: 'vins', description: 'Sahari réserve rouge 75cl' },
+  { id: 'p2bc6935c', name: 'CUVE DE PRISEDENT 75 CL', price: 170, category: 'vins', description: 'VIN ORD' },
 
   // Bières
   { id: 'b1', name: 'BUDWEISER', price: 50.00, category: 'bieres', description: 'Budweiser' },
@@ -91,22 +93,65 @@ export let products: Product[] = [
   { id: 'e7', name: 'SODA 33 CL', price: 25.00, category: 'eaux-sodas', description: 'Soda 33cl' }
 ];
 
+// Save data to localStorage
+const saveData = () => {
+  try {
+    localStorage.setItem('cafeProducts', JSON.stringify(products));
+    localStorage.setItem('cafeCategories', JSON.stringify(categories));
+    console.log('Data saved to localStorage');
+  } catch (error) {
+    console.error('Error saving data to localStorage:', error);
+  }
+};
+
+// Load data from localStorage
+const loadData = () => {
+  try {
+    const savedProducts = localStorage.getItem('cafeProducts');
+    const savedCategories = localStorage.getItem('cafeCategories');
+    
+    if (savedProducts) {
+      products = JSON.parse(savedProducts);
+    }
+    
+    if (savedCategories) {
+      categories = JSON.parse(savedCategories);
+    }
+    
+    console.log('Data loaded from localStorage');
+  } catch (error) {
+    console.error('Error loading data from localStorage:', error);
+  }
+};
+
+// Try to load data when this module is imported
+loadData();
+
 export const getProductsByCategory = (categoryId: string): Product[] => {
   return products.filter(product => product.category === categoryId);
 };
 
 export const addProduct = (product: Product): Product[] => {
   products = [...products, product];
+  saveData();
+  // Dispatch custom event to notify other components
+  const event = new CustomEvent('productUpdated');
+  window.dispatchEvent(event);
   return products;
 };
 
 export const addCategory = (category: Category): Category[] => {
   categories = [...categories, category];
+  saveData();
+  // Dispatch custom event to notify other components
+  const event = new CustomEvent('categoryUpdated');
+  window.dispatchEvent(event);
   return categories;
 };
 
 // Function to force refresh the data
 export const refreshData = () => {
+  loadData(); // Make sure we get the latest data from localStorage
   return {
     categories: [...categories],
     products: [...products]

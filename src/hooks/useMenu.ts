@@ -33,18 +33,22 @@ export const useMenu = () => {
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (!document.hidden) {
-        const data = refreshData();
-        setAvailableCategories(data.categories);
-        
-        if (selectedCategory) {
-          const productsForCategory = data.products.filter(product => product.category === selectedCategory);
-          setCurrentProducts(productsForCategory);
-        }
+        refreshMenuData();
       }
     };
 
     const handleProductUpdate = () => {
       console.log("Product update event detected, refreshing menu data");
+      refreshMenuData();
+    };
+    
+    const handleCategoryUpdate = () => {
+      console.log("Category update event detected, refreshing menu data");
+      refreshMenuData();
+    };
+
+    // Function to refresh menu data
+    const refreshMenuData = () => {
       const data = refreshData();
       setAvailableCategories(data.categories);
       
@@ -57,11 +61,13 @@ export const useMenu = () => {
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('focus', handleVisibilityChange);
     window.addEventListener('productUpdated', handleProductUpdate);
+    window.addEventListener('categoryUpdated', handleCategoryUpdate);
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleVisibilityChange);
       window.removeEventListener('productUpdated', handleProductUpdate);
+      window.removeEventListener('categoryUpdated', handleCategoryUpdate);
     };
   }, [selectedCategory]);
 
