@@ -1,14 +1,15 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Header from '@/components/POS/Header';
 import SalesArea from '@/components/POS/SalesArea';
 import Cart from '@/components/POS/Cart';
 import CheckoutModal from '@/components/POS/CheckoutModal';
 import InvoiceModal from '@/components/POS/InvoiceModal';
 import OpenInvoices from '@/components/POS/OpenInvoices';
+import ManagerPasswordModal from '@/components/POS/ManagerPasswordModal';
 import { useMenu } from '@/hooks/useMenu';
 import { useInvoices } from '@/hooks/useInvoices';
-import { PaymentMethod } from '@/types';
+import { PaymentMethod, CartItem } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 
 const Index = () => {
@@ -30,11 +31,19 @@ const Index = () => {
     handleNewInvoice,
     handleAddToCart,
     handleUpdateQuantity,
-    handleCompleteOrder
+    handleCompleteOrder,
+    lockInvoice,
+    unlockInvoice
   } = useInvoices();
 
-  const [isCheckoutModalOpen, setIsCheckoutModalOpen] = React.useState<boolean>(false);
-  const [isInvoiceModalOpen, setIsInvoiceModalOpen] = React.useState<boolean>(false);
+  const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState<boolean>(false);
+  const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState<boolean>(false);
+  const [isManagerModalOpen, setIsManagerModalOpen] = useState<boolean>(false);
+  const [pendingAction, setPendingAction] = useState<{
+    type: 'update' | 'remove' | 'clear';
+    item?: CartItem;
+    quantity?: number;
+  } | null>(null);
   const { toast } = useToast();
 
   // Ensure we restore the current invoice state from localStorage
@@ -49,6 +58,85 @@ const Index = () => {
 
   const handleCheckout = () => {
     setIsCheckoutModalOpen(true);
+  };
+  
+  const handleUpdateQuantityWithCheck = (item: CartItem, newQuantity: number) => {
+    const currentInvoice = getCurrentInvoice();
+    
+    if (currentInvoice?.isLocked) {
+      // La facture est verrouillée, demander le mot de passe gérant
+      setPendingAction({ type: 'update', item, quantity: newQuantity });
+      setIsManagerModalOpen(true);
+    } else {
+      // La facture n'est pas verrouillée, mettre à jour directement
+      handleUpdateQuantity(item, newQuantity);
+    }
+  };
+  
+  const handleRemoveItemWithCheck = (item: CartItem) => {
+    const currentInvoice = getCurrentInvoice();
+    
+    if (currentInvoice?.isLocked) {
+      // La facture est verrouillée, demander le mot de passe gérant
+      setPendingAction({ type: 'remove', item });
+      setIsManagerModalOpen(true);
+    } else {
+      // La facture n'est pas verrouillée, supprimer directement
+      handleUpdateQuantity(item, 0);
+    }
+  };
+  
+  const handleClearCartWithCheck = () => {
+    const currentInvoice = getCurrentInvoice();
+    
+    if (currentInvoice?.isLocked) {
+      // La facture est verrouillée, demander le mot de passe gérant
+      setPendingAction({ type: 'clear' });
+      setIsManagerModalOpen(true);
+    } else {
+      // La facture n'est pas verrouillée, vider directement
+      if (currentInvoice) {
+        currentInvoice.items.forEach(item => handleUpdateQuantity(item, 0));
+      }
+    }
+  };
+  
+  const handleManagerConfirm = () => {
+    // Le mot de passe a été validé, exécuter l'action en attente
+    if (pendingAction && activeInvoiceId) {
+      // Déverrouiller la facture
+      unlockInvoice(activeInvoiceId);
+      
+      switch (pendingAction.type) {
+        case 'update':
+          if (pendingAction.item && pendingAction.quantity !== undefined) {
+            handleUpdateQuantity(pendingAction.item, pendingAction.quantity);
+          }
+          break;
+        case 'remove':
+          if (pendingAction.item) {
+            handleUpdateQuantity(pendingAction.item, 0);
+          }
+          break;
+        case 'clear':
+          const currentInvoice = getCurrentInvoice();
+          if (currentInvoice) {
+            currentInvoice.items.forEach(item => handleUpdateQuantity(item, 0));
+          }
+          break;
+      }
+      
+      // Reverrouiller la facture
+      setTimeout(() => {
+        if (activeInvoiceId) {
+          lockInvoice(activeInvoiceId);
+        }
+      }, 100);
+    }
+    
+    // Réinitialiser
+    setPendingAction(null);
+    setIsManagerModalOpen(false);
   };
 
   const handleCompleteCheckout = (paymentMethod: PaymentMethod, tableNumber?: number, roomNumber?: string, shouldComplete?: boolean) => {
@@ -117,13 +205,9 @@ const Index = () => {
           <div className="lg:col-span-1">
             <Cart 
               items={currentInvoice?.items || []}
-              onUpdateQuantity={handleUpdateQuantity}
-              onRemoveItem={(item) => handleUpdateQuantity(item, 0)}
-              onClearCart={() => {
-                if (currentInvoice) {
-                  currentInvoice.items.forEach(item => handleUpdateQuantity(item, 0));
-                }
-              }}
+              onUpdateQuantity={handleUpdateQuantityWithCheck}
+              onRemoveItem={handleRemoveItemWithCheck}
+              onClearCart={handleClearCartWithCheck}
               onCheckout={handleCheckout}
             />
           </div>
@@ -149,6 +233,17 @@ const Index = () => {
           orderId={currentOrder.id}
           tableNumber={currentOrder.tableNumber}
           roomNumber={currentOrder.roomNumber}
+        />
+      )}
+
+      {isManagerModalOpen && (
+        <ManagerPasswordModal
+          isOpen={isManagerModalOpen}
+          onClose={() => {
+            setIsManagerModalOpen(false);
+            setPendingAction(null);
+          }}
+          onConfirm={handleManagerConfirm}
         />
       )}
     </div>

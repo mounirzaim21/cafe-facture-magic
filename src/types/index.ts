@@ -64,6 +64,7 @@ export type Invoice = {
   paymentMethod?: PaymentMethod;
   tableNumber?: number;
   roomNumber?: string;
+  isLocked?: boolean; // Indique si la facture est verrouillée contre les modifications
 };
 
 export type Transaction = {
@@ -80,4 +81,14 @@ export type Transaction = {
   totalAmount: number;
   paymentMethod: PaymentMethod;
   date: Date;
+};
+
+export type AppSettings = {
+  projectName: string;
+  logo?: string;
+  headerText: string;
+  footerText: string;
+  primaryColor: string;
+  secondaryColor: string;
+  managerPassword: string;
 };

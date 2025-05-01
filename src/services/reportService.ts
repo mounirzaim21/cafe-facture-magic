@@ -61,6 +61,12 @@ export const resetOrderStore = () => {
   console.log("Order store has been reset and archived");
 };
 
+// Fonction pour vérifier si tous les brouillons sont complétés
+export const checkAllDraftsCompleted = (): boolean => {
+  const draftInvoices = JSON.parse(localStorage.getItem('draftInvoices') || '[]');
+  return draftInvoices.every((invoice: any) => invoice.status === 'completed');
+};
+
 // Fonction pour récupérer le résumé quotidien
 export const getDailySummary = (): DailySummary => {
   // Calculate based on all orders in the store
@@ -98,9 +104,19 @@ export const saveDailySummary = (): Promise<boolean> => {
 };
 
 // Fonction pour clôturer la journée
-export const closeDailyOperations = (): Promise<boolean> => {
+export const closeDailyOperations = (): Promise<{success: boolean, message?: string}> => {
   return new Promise((resolve) => {
     setTimeout(() => {
+      // Vérifier que tous les brouillons sont complétés
+      const allCompleted = checkAllDraftsCompleted();
+      if (!allCompleted) {
+        resolve({
+          success: false,
+          message: "Impossible de clôturer. Toutes les factures doivent être validées et payées."
+        });
+        return;
+      }
+      
       // Save today's orders to archive for historical access
       const today = new Date();
       const closeDate = today.toISOString();
@@ -135,7 +151,10 @@ export const closeDailyOperations = (): Promise<boolean> => {
       localStorage.removeItem('activeInvoiceId');
       
       console.log('Clôture effectuée avec', dailyTransactions.length, 'commandes archivées');
-      resolve(true);
+      resolve({
+        success: true,
+        message: "Clôture journalière effectuée avec succès."
+      });
     }, 1000);
   });
 };

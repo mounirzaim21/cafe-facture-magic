@@ -1,5 +1,5 @@
 
-import React, { useRef } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { CartItem, PaymentMethod } from '@/types';
@@ -28,6 +28,23 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
   roomNumber,
 }) => {
   const invoiceRef = useRef<HTMLDivElement>(null);
+  const [projectName, setProjectName] = useState('Moni_Point de Vente');
+  const [headerText, setHeaderText] = useState('');
+  const [footerText, setFooterText] = useState('');
+  const [logo, setLogo] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Charger les paramètres de facture depuis localStorage
+    const savedProjectName = localStorage.getItem('projectName');
+    const savedHeaderText = localStorage.getItem('headerText');
+    const savedFooterText = localStorage.getItem('footerText');
+    const savedLogo = localStorage.getItem('projectLogo');
+    
+    if (savedProjectName) setProjectName(savedProjectName);
+    if (savedHeaderText) setHeaderText(savedHeaderText);
+    if (savedFooterText) setFooterText(savedFooterText);
+    if (savedLogo) setLogo(savedLogo);
+  }, []);
 
   const calculateSubtotal = (): number => {
     return items.reduce((total, item) => total + item.product.price * item.quantity, 0);
@@ -105,6 +122,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
             .border-dotted { border-bottom: 1px dotted #ccc; }
             .pb-1 { padding-bottom: 4px; }
             .text-right { text-align: right; }
+            .logo { max-width: 60%; max-height: 50px; margin: 0 auto; display: block; }
           </style>
         </head>
         <body>
@@ -126,7 +144,6 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
   };
 
   const handleAccept = () => {
-    // Implémenter une logique de validation si nécessaire
     onClose();
   };
 
@@ -139,9 +156,17 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
         
         <div className="bg-white p-4 rounded-lg text-sm" ref={invoiceRef} data-invoice>
           <div className="text-center mb-4 space-y-1">
-            <h2 className="text-lg font-bold">Moni_Point de Vente</h2>
-            <p className="text-xs">123 Rue de Paris, 75001 Paris</p>
-            <p className="text-xs">Tel: 01 23 45 67 89</p>
+            {logo && (
+              <img src={logo} alt="Logo" className="logo mb-2 mx-auto" />
+            )}
+            <h2 className="text-lg font-bold">{projectName}</h2>
+            
+            {headerText && (
+              <div className="text-xs whitespace-pre-line">
+                {headerText}
+              </div>
+            )}
+            
             <div className="border-t border-b border-dashed my-2 py-2">
               <p>Facture N°: {orderId}</p>
               <p>Date: {formatDate(date)}</p>
@@ -186,8 +211,13 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
           </div>
 
           <div className="text-center text-xs mt-4 space-y-1">
-            <p>Merci de votre visite!</p>
-            <p>TVA MA12345678900</p>
+            {footerText ? (
+              <div className="whitespace-pre-line">
+                {footerText}
+              </div>
+            ) : (
+              <p>Merci de votre visite!</p>
+            )}
           </div>
         </div>
 

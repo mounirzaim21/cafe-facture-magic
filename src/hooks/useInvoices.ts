@@ -65,7 +65,8 @@ export const useInvoices = () => {
       items: [],
       status: 'draft',
       createdAt: new Date(),
-      total: 0
+      total: 0,
+      isLocked: false // Par défaut, la facture est déverrouillée
     };
     setInvoices([...invoices, newInvoice]);
     setActiveInvoiceId(newInvoice.id);
@@ -80,6 +81,12 @@ export const useInvoices = () => {
     setInvoices(prevInvoices => {
       return prevInvoices.map(invoice => {
         if (invoice.id === activeInvoiceId) {
+          // Vérifier si la facture est verrouillée
+          if (invoice.isLocked) {
+            console.log('La facture est verrouillée et ne peut pas être modifiée');
+            return invoice;
+          }
+          
           const existingItem = invoice.items.find(item => item.product.id === product.id);
           const updatedItems = existingItem
             ? invoice.items.map(item =>
@@ -106,6 +113,12 @@ export const useInvoices = () => {
     setInvoices(prevInvoices => {
       return prevInvoices.map(invoice => {
         if (invoice.id === activeInvoiceId) {
+          // Vérifier si la facture est verrouillée
+          if (invoice.isLocked) {
+            console.log('La facture est verrouillée et ne peut pas être modifiée');
+            return invoice;
+          }
+          
           const updatedItems = newQuantity === 0
             ? invoice.items.filter(i => i.product.id !== item.product.id)
             : invoice.items.map(i =>
@@ -123,6 +136,22 @@ export const useInvoices = () => {
         return invoice;
       });
     });
+  };
+
+  const lockInvoice = (invoiceId: string) => {
+    setInvoices(prevInvoices => 
+      prevInvoices.map(inv => 
+        inv.id === invoiceId ? { ...inv, isLocked: true } : inv
+      )
+    );
+  };
+
+  const unlockInvoice = (invoiceId: string) => {
+    setInvoices(prevInvoices => 
+      prevInvoices.map(inv => 
+        inv.id === invoiceId ? { ...inv, isLocked: false } : inv
+      )
+    );
   };
 
   const handleCompleteOrder = (paymentMethod: PaymentMethod, tableNumber?: number, roomNumber?: string) => {
@@ -159,13 +188,19 @@ export const useInvoices = () => {
               completedAt: new Date(),
               paymentMethod,
               tableNumber,
-              roomNumber
+              roomNumber,
+              isLocked: true // Verrouiller la facture une fois complétée
             }
           : inv
       )
     );
 
     setCurrentOrder(newOrder);
+  };
+
+  const areAllInvoicesCompleted = (): boolean => {
+    // Vérifier si toutes les factures sont complétées
+    return invoices.every(invoice => invoice.status === 'completed');
   };
 
   return {
@@ -179,6 +214,9 @@ export const useInvoices = () => {
     handleNewInvoice,
     handleAddToCart,
     handleUpdateQuantity,
-    handleCompleteOrder
+    handleCompleteOrder,
+    lockInvoice,
+    unlockInvoice,
+    areAllInvoicesCompleted
   };
 };
