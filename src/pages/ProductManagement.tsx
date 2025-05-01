@@ -71,6 +71,10 @@ const ProductManagement = () => {
     });
     
     console.log('Nouveau produit sauvegardé:', productToSave);
+    
+    // Dispatch custom event to notify components to refresh their data
+    const customEvent = new CustomEvent('productUpdated', { detail: productToSave });
+    window.dispatchEvent(customEvent);
   };
 
   const handleSaveCategory = () => {
@@ -116,6 +120,10 @@ const ProductManagement = () => {
     });
     
     console.log('Nouvelle catégorie sauvegardée:', categoryToSave);
+    
+    // Dispatch custom event to notify components to refresh their data
+    const customEvent = new CustomEvent('productUpdated', { detail: categoryToSave });
+    window.dispatchEvent(customEvent);
   };
 
   return (

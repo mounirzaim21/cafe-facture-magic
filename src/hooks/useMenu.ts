@@ -29,7 +29,7 @@ export const useMenu = () => {
     }
   }, [selectedCategory]);
 
-  // Handle page visibility changes
+  // Handle page visibility changes and product updates
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (!document.hidden) {
@@ -43,12 +43,25 @@ export const useMenu = () => {
       }
     };
 
+    const handleProductUpdate = () => {
+      console.log("Product update event detected, refreshing menu data");
+      const data = refreshData();
+      setAvailableCategories(data.categories);
+      
+      if (selectedCategory) {
+        const productsForCategory = data.products.filter(product => product.category === selectedCategory);
+        setCurrentProducts(productsForCategory);
+      }
+    };
+
     document.addEventListener('visibilitychange', handleVisibilityChange);
     window.addEventListener('focus', handleVisibilityChange);
+    window.addEventListener('productUpdated', handleProductUpdate);
 
     return () => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       window.removeEventListener('focus', handleVisibilityChange);
+      window.removeEventListener('productUpdated', handleProductUpdate);
     };
   }, [selectedCategory]);
 
