@@ -1,11 +1,12 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 
 interface ColorPickerProps {
   value: string;
   onChange: (color: string) => void;
+  cssVariable?: string; // Variable CSS à mettre à jour immédiatement
 }
 
 const colors = [
@@ -21,7 +22,22 @@ const colors = [
   '#000000', // black
 ];
 
-export const ColorPicker: React.FC<ColorPickerProps> = ({ value, onChange }) => {
+export const ColorPicker: React.FC<ColorPickerProps> = ({ value, onChange, cssVariable }) => {
+  // Effet pour appliquer immédiatement la couleur si une variable CSS est spécifiée
+  useEffect(() => {
+    if (cssVariable && value) {
+      document.documentElement.style.setProperty(cssVariable, value);
+    }
+  }, [value, cssVariable]);
+
+  const handleColorChange = (color: string) => {
+    onChange(color);
+    // Appliquer immédiatement la couleur pour un feedback visuel instantané
+    if (cssVariable) {
+      document.documentElement.style.setProperty(cssVariable, color);
+    }
+  };
+
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -38,7 +54,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({ value, onChange }) => 
               key={colorOption}
               className="w-8 h-8 p-0 rounded-md"
               style={{ backgroundColor: colorOption }}
-              onClick={() => onChange(colorOption)}
+              onClick={() => handleColorChange(colorOption)}
             />
           ))}
         </div>

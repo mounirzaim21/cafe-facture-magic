@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import Header from '@/components/POS/Header';
 import { Button } from '@/components/ui/button';
@@ -50,6 +49,10 @@ const SettingsPage = () => {
     // Mettre à jour les variables CSS
     document.documentElement.style.setProperty('--cafe-navy', primaryColor);
     document.documentElement.style.setProperty('--cafe-bordeaux', secondaryColor);
+    
+    // Appliquer également aux variables de couleur CSS standard pour une meilleure intégration
+    document.documentElement.style.setProperty('--sidebar-primary', primaryColor);
+    document.documentElement.style.setProperty('--accent-foreground', secondaryColor);
 
     // Afficher un toast de confirmation
     toast({
@@ -178,11 +181,18 @@ const SettingsPage = () => {
                   <div className="flex items-center space-x-2">
                     <Palette className="h-4 w-4 text-gray-500" />
                     <div className="flex-1 flex items-center gap-2">
-                      <ColorPicker value={primaryColor} onChange={setPrimaryColor} />
+                      <ColorPicker 
+                        value={primaryColor} 
+                        onChange={setPrimaryColor}
+                        cssVariable="--cafe-navy"
+                      />
                       <Input
                         id="primaryColor"
                         value={primaryColor}
-                        onChange={(e) => setPrimaryColor(e.target.value)}
+                        onChange={(e) => {
+                          setPrimaryColor(e.target.value);
+                          document.documentElement.style.setProperty('--cafe-navy', e.target.value);
+                        }}
                         placeholder="#1a3a5f"
                       />
                     </div>
@@ -194,11 +204,18 @@ const SettingsPage = () => {
                   <div className="flex items-center space-x-2">
                     <Palette className="h-4 w-4 text-gray-500" />
                     <div className="flex-1 flex items-center gap-2">
-                      <ColorPicker value={secondaryColor} onChange={setSecondaryColor} />
+                      <ColorPicker 
+                        value={secondaryColor} 
+                        onChange={setSecondaryColor}
+                        cssVariable="--cafe-bordeaux" 
+                      />
                       <Input
                         id="secondaryColor"
                         value={secondaryColor}
-                        onChange={(e) => setSecondaryColor(e.target.value)}
+                        onChange={(e) => {
+                          setSecondaryColor(e.target.value);
+                          document.documentElement.style.setProperty('--cafe-bordeaux', e.target.value);
+                        }}
                         placeholder="#93293d"
                       />
                     </div>

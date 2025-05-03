@@ -22,10 +22,14 @@ const App = () => {
     
     if (primaryColor) {
       document.documentElement.style.setProperty('--cafe-navy', primaryColor);
+      // Appliquer également aux variables de couleur CSS standard pour une meilleure intégration
+      document.documentElement.style.setProperty('--sidebar-primary', primaryColor);
     }
     
     if (secondaryColor) {
       document.documentElement.style.setProperty('--cafe-bordeaux', secondaryColor);
+      // Appliquer également aux variables de couleur CSS standard pour une meilleure intégration
+      document.documentElement.style.setProperty('--accent-foreground', secondaryColor);
     }
 
     // S'assurer que les variables CSS sont bien définies dans le root
@@ -39,6 +43,15 @@ const App = () => {
     if (!style.getPropertyValue('--cafe-bordeaux')) {
       root.style.setProperty('--cafe-bordeaux', '#93293d');
     }
+
+    console.log("Couleurs appliquées:", {
+      primaryColor,
+      secondaryColor,
+      cssVars: {
+        cafeNavy: style.getPropertyValue('--cafe-navy'),
+        cafeBordeaux: style.getPropertyValue('--cafe-bordeaux')
+      }
+    });
   }, []);
 
   return (

@@ -49,6 +49,27 @@
     --cafe-bordeaux: #93293d;
   }
 
+  /* CSS personnalisé pour utiliser les variables dans divers éléments */
+  .bg-cafe-navy {
+    background-color: var(--cafe-navy);
+  }
+  .text-cafe-navy {
+    color: var(--cafe-navy);
+  }
+  .border-cafe-navy {
+    border-color: var(--cafe-navy);
+  }
+
+  .bg-cafe-bordeaux {
+    background-color: var(--cafe-bordeaux);
+  }
+  .text-cafe-bordeaux {
+    color: var(--cafe-bordeaux);
+  }
+  .border-cafe-bordeaux {
+    border-color: var(--cafe-bordeaux);
+  }
+
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
