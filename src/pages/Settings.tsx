@@ -178,10 +178,7 @@ const SettingsPage = () => {
                   <div className="flex items-center space-x-2">
                     <Palette className="h-4 w-4 text-gray-500" />
                     <div className="flex-1 flex items-center gap-2">
-                      <div
-                        className="w-10 h-10 rounded-md border"
-                        style={{ backgroundColor: primaryColor }}
-                      />
+                      <ColorPicker value={primaryColor} onChange={setPrimaryColor} />
                       <Input
                         id="primaryColor"
                         value={primaryColor}
@@ -197,10 +194,7 @@ const SettingsPage = () => {
                   <div className="flex items-center space-x-2">
                     <Palette className="h-4 w-4 text-gray-500" />
                     <div className="flex-1 flex items-center gap-2">
-                      <div
-                        className="w-10 h-10 rounded-md border"
-                        style={{ backgroundColor: secondaryColor }}
-                      />
+                      <ColorPicker value={secondaryColor} onChange={setSecondaryColor} />
                       <Input
                         id="secondaryColor"
                         value={secondaryColor}

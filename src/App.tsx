@@ -27,6 +27,18 @@ const App = () => {
     if (secondaryColor) {
       document.documentElement.style.setProperty('--cafe-bordeaux', secondaryColor);
     }
+
+    // S'assurer que les variables CSS sont bien définies dans le root
+    const root = document.documentElement;
+    const style = getComputedStyle(root);
+    
+    if (!style.getPropertyValue('--cafe-navy')) {
+      root.style.setProperty('--cafe-navy', '#1a3a5f');
+    }
+    
+    if (!style.getPropertyValue('--cafe-bordeaux')) {
+      root.style.setProperty('--cafe-bordeaux', '#93293d');
+    }
   }, []);
 
   return (

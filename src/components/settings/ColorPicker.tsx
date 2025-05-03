@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 
@@ -22,20 +22,13 @@ const colors = [
 ];
 
 export const ColorPicker: React.FC<ColorPickerProps> = ({ value, onChange }) => {
-  const [color, setColor] = useState(value);
-
-  const handleColorChange = (newColor: string) => {
-    setColor(newColor);
-    onChange(newColor);
-  };
-
   return (
     <Popover>
       <PopoverTrigger asChild>
         <Button 
           variant="outline" 
           className="w-12 h-8 p-0 border-2"
-          style={{ backgroundColor: color }}
+          style={{ backgroundColor: value }}
         />
       </PopoverTrigger>
       <PopoverContent className="w-64">
@@ -45,7 +38,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({ value, onChange }) => 
               key={colorOption}
               className="w-8 h-8 p-0 rounded-md"
               style={{ backgroundColor: colorOption }}
-              onClick={() => handleColorChange(colorOption)}
+              onClick={() => onChange(colorOption)}
             />
           ))}
         </div>
