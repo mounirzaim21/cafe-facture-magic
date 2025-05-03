@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { CartItem, PaymentMethod } from '@/types';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
@@ -65,6 +65,7 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Finaliser la commande</DialogTitle>
+            <DialogDescription>Complétez les informations pour finaliser votre commande</DialogDescription>
           </DialogHeader>
 
           <div className="py-4">
@@ -153,7 +154,11 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
             <Button variant="outline" onClick={onClose}>
               Annuler
             </Button>
-            <Button onClick={handleRequestModifyCart} variant="outline" className="bg-amber-600 text-white hover:bg-amber-700">
+            <Button 
+              onClick={handleRequestModifyCart} 
+              variant="outline" 
+              className="bg-amber-600 text-white hover:bg-amber-700"
+            >
               <Edit className="mr-2 h-4 w-4" />
               Modifier
             </Button>

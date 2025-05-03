@@ -82,6 +82,37 @@ const Header: React.FC = () => {
           </Link>
         </nav>
 
+        {/* Navbar pour mobile */}
+        <div className="md:hidden flex items-center">
+          <div className="relative inline-block text-left dropdown">
+            <button className="bg-transparent rounded px-3 py-1 focus:outline-none border border-white/30">
+              <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+              </svg>
+            </button>
+            <div className="opacity-0 invisible dropdown-menu transition-all duration-300 transform origin-top-right -translate-y-2 scale-95 absolute right-0 mt-2 w-56 origin-top-right bg-white divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
+              <div className="py-1 bg-cafe-navy">
+                <Link to="/" className="block px-4 py-2 text-white hover:bg-cafe-navy/80">
+                  <ShoppingCart className="h-4 w-4 inline mr-2" />
+                  Point de vente
+                </Link>
+                <Link to="/products" className="block px-4 py-2 text-white hover:bg-cafe-navy/80">
+                  <Plus className="h-4 w-4 inline mr-2" />
+                  Produits
+                </Link>
+                <Link to="/reports" className="block px-4 py-2 text-white hover:bg-cafe-navy/80">
+                  <BarChart className="h-4 w-4 inline mr-2" />
+                  Rapports
+                </Link>
+                <Link to="/settings" className="block px-4 py-2 text-white hover:bg-cafe-navy/80">
+                  <Settings className="h-4 w-4 inline mr-2" />
+                  Paramètres
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="hidden md:block text-sm text-white/80">
           {currentDate}
         </div>
