@@ -6,8 +6,8 @@ interface PrintHandlerProps {
   orderId: string;
 }
 
-const PrintHandler: React.FC<PrintHandlerProps> = ({ content, orderId }) => {
-  const handlePrint = () => {
+const PrintHandler = ({ content, orderId }: PrintHandlerProps) => {
+  return () => {
     if (content.current) {
       const printWindow = window.open('', '_blank');
       if (!printWindow) {
@@ -70,8 +70,6 @@ const PrintHandler: React.FC<PrintHandlerProps> = ({ content, orderId }) => {
       printWindow.document.close();
     }
   };
-
-  return handlePrint;
 };
 
 export default PrintHandler;

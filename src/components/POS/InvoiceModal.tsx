@@ -50,7 +50,8 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
     if (savedLogo) setLogo(savedLogo);
   }, []);
 
-  const handlePrintInvoice = PrintHandler({ content: invoiceRef, orderId });
+  // Get the print handler function
+  const printInvoiceHandler = PrintHandler({ content: invoiceRef, orderId });
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -79,7 +80,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={handlePrintInvoice} className="mr-2">
+          <Button variant="outline" onClick={() => printInvoiceHandler()} className="mr-2">
             <Printer className="mr-2 h-4 w-4" />
             Imprimer
           </Button>
