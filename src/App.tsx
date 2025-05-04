@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import ProductManagement from "./pages/ProductManagement";
 import SalesReport from "./pages/SalesReport";
+import SalesHistory from "./pages/SalesHistory";
 import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -65,6 +66,7 @@ const App = () => {
               <Route path="/" element={<Index />} />
               <Route path="/products" element={<ProductManagement />} />
               <Route path="/reports" element={<SalesReport />} />
+              <Route path="/history" element={<SalesHistory />} />
               <Route path="/settings" element={<Settings />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

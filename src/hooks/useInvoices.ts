@@ -171,7 +171,7 @@ export const useInvoices = () => {
       completed: true,
     };
 
-    // Add the order to our central store
+    // Add the order to our central store (now also adds to history)
     const addedOrder = addOrder(newOrder);
     console.log("Order added successfully:", addedOrder);
 

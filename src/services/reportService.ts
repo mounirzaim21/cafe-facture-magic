@@ -1,6 +1,6 @@
-
 import { DailySummary, Order, PaymentMethod, CartItem } from '@/types';
 import { v4 as uuidv4 } from 'uuid';
+import { addOrderToHistory, syncOrdersWithHistory } from './historyService';
 
 // In-memory storage for orders (in a real app, this would be in a database)
 let ordersStore: Order[] = [];
@@ -21,6 +21,9 @@ const initOrderStore = () => {
       archivedOrders = JSON.parse(savedArchive);
       console.log("Loaded archived orders:", archivedOrders.length);
     }
+    
+    // Synchroniser avec l'historique global
+    setTimeout(syncOrdersWithHistory, 0);
   } catch (error) {
     console.error("Error loading saved orders:", error);
   }
@@ -43,6 +46,9 @@ export const addOrder = (order: Order) => {
   
   // Save to localStorage for persistence
   localStorage.setItem('ordersStore', JSON.stringify(ordersStore));
+  
+  // Ajouter également à l'historique global
+  addOrderToHistory(order);
   
   console.log("Order store updated:", ordersStore);
   return order;
@@ -138,6 +144,9 @@ export const closeDailyOperations = (): Promise<{success: boolean, message?: str
       // Add current orders to archive
       archivedOrders = [...archivedOrders, ...ordersStore];
       localStorage.setItem('archivedOrders', JSON.stringify(archivedOrders));
+      
+      // Synchroniser avec l'historique global
+      syncOrdersWithHistory();
       
       // Save close date
       localStorage.setItem('lastCloseDate', closeDate);
@@ -288,3 +297,6 @@ export const getLastDailyCloseReport = () => {
   }
   return null;
 };
+
+// Exposer les collections de commandes pour la synchronisation avec l'historique
+export { ordersStore, archivedOrders };
