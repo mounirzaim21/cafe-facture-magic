@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Invoice, CartItem, PaymentMethod, Order, Product } from '@/types';
 import { addOrder } from '@/services/reportService';
+import { addOrderToHistory } from '@/services/historyService';
 
 export const useInvoices = () => {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -160,10 +161,16 @@ export const useInvoices = () => {
     const invoice = getCurrentInvoice();
     if (!invoice) return;
 
+    // Calcul du total en fonction du mode de paiement
+    let totalAmount = invoice.total;
+    if (paymentMethod === 'free') {
+      totalAmount = 0; // Total à 0 pour les gratuités
+    }
+
     const newOrder: Order = {
       id: invoice.number,
       items: [...invoice.items],
-      total: invoice.total,
+      total: totalAmount,
       paymentMethod,
       date: new Date(),
       tableNumber,
@@ -173,6 +180,9 @@ export const useInvoices = () => {
 
     // Add the order to our central store (now also adds to history)
     const addedOrder = addOrder(newOrder);
+    // Add order to history directly
+    addOrderToHistory(newOrder);
+    
     console.log("Order added successfully:", addedOrder);
 
     // Trigger a custom event to notify components to refresh their data
@@ -189,6 +199,7 @@ export const useInvoices = () => {
               paymentMethod,
               tableNumber,
               roomNumber,
+              total: totalAmount, // Mettre à jour le total selon le mode de paiement
               isLocked: true // Verrouiller la facture une fois complétée
             }
           : inv

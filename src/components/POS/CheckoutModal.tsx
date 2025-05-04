@@ -29,6 +29,10 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
   const [isManagerModalOpen, setIsManagerModalOpen] = useState<boolean>(false);
 
   const calculateTotal = (): number => {
+    // Si le mode de paiement est "Gratuité", on retourne 0
+    if (paymentMethod === 'free') {
+      return 0;
+    }
     return items.reduce((total, item) => total + item.product.price * item.quantity, 0);
   };
 

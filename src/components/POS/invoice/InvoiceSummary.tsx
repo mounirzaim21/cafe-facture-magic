@@ -14,11 +14,15 @@ const InvoiceSummary: React.FC<InvoiceSummaryProps> = ({ items, paymentMethod })
   };
 
   const calculateTax = (): number => {
+    // Si c'est une gratuité, pas de TVA
+    if (paymentMethod === 'free') return 0;
     // TVA à 10% pour la restauration au Maroc
     return calculateSubtotal() * 0.1;
   };
 
   const calculateTotal = (): number => {
+    // Si c'est une gratuité, total à 0
+    if (paymentMethod === 'free') return 0;
     return calculateSubtotal() + calculateTax();
   };
 
