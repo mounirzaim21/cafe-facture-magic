@@ -16,5 +16,10 @@ export default defineConfig(({ mode }) => ({
   },
   server: {
     port: 8080
+  },
+  base: '/',
+  build: {
+    outDir: 'dist',
+    emptyOutDir: true
   }
 }));
