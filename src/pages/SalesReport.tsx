@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Save, BarChart2, CreditCard, CircleDollarSign, CalendarClock, Receipt, Trash2, Printer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -33,6 +33,7 @@ import {
 import SalesDetailCard from '@/components/reports/SalesDetailCard';
 import PaymentMethodChart from '@/components/reports/PaymentMethodChart';
 import ProductCategoryChart from '@/components/reports/ProductCategoryChart';
+import MainCourtReport from '@/components/reports/MainCourtReport';
 
 const SalesReportPage = () => {
   const [startDate, setStartDate] = useState('');
@@ -45,6 +46,7 @@ const SalesReportPage = () => {
     report: false
   });
   const [activeTab, setActiveTab] = useState('reports');
+  const mainCourtReportRef = useRef<HTMLDivElement>(null);
   
   const { toast } = useToast();
 
@@ -422,6 +424,80 @@ const SalesReportPage = () => {
     printWindow.document.close();
   };
 
+  const handlePrintMainCourt = () => {
+    if (mainCourtReportRef.current) {
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        toast({
+          title: "Erreur",
+          description: "Veuillez autoriser les popups pour l'impression",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Main Courante</title>
+          <style>
+            body {
+              font-family: Arial, sans-serif;
+              margin: 0;
+              padding: 20px;
+            }
+            .print-a4 {
+              width: 210mm;
+              padding: 10mm;
+              margin: 0 auto;
+            }
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-bottom: 20px;
+            }
+            th, td {
+              padding: 8px;
+              text-align: left;
+              border: 1px solid #ddd;
+            }
+            th {
+              background-color: #f2f2f2;
+              font-weight: bold;
+            }
+            h1, h2 {
+              text-align: center;
+              margin-bottom: 16px;
+            }
+            .text-right {
+              text-align: right;
+            }
+            .subheader {
+              text-align: center;
+              margin-bottom: 20px;
+            }
+          </style>
+        </head>
+        <body>
+          <div class="print-a4">
+            <h1>Main Courante</h1>
+            ${mainCourtReportRef.current.innerHTML}
+          </div>
+          <script>
+            window.onload = function() {
+              window.print();
+              setTimeout(function() { window.close(); }, 500);
+            };
+          </script>
+        </body>
+        </html>
+      `);
+      
+      printWindow.document.close();
+    }
+  };
+
   return (
     <div className="container mx-auto py-6 px-4">
       <div className="flex justify-between items-center mb-6">
@@ -643,58 +719,18 @@ const SalesReportPage = () => {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Main Courante</CardTitle>
-            <Button onClick={() => handlePrint('daily-transactions')} variant="outline">
+            <Button onClick={handlePrintMainCourt} variant="outline">
               <Printer className="mr-2 h-4 w-4" />
               Imprimer
             </Button>
           </CardHeader>
           <CardContent>
-            <div id="daily-transactions">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Facture</TableHead>
-                    <TableHead>Table</TableHead>
-                    <TableHead>Serveur</TableHead>
-                    <TableHead>Opérateur</TableHead>
-                    <TableHead>Total Nour</TableHead>
-                    <TableHead>Total Bois</TableHead>
-                    <TableHead>Total Div</TableHead>
-                    <TableHead>Total TTC</TableHead>
-                    <TableHead>Mode de Paiement</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {transactions.length > 0 ? (
-                    transactions.map((transaction) => (
-                      <TableRow key={transaction.id}>
-                        <TableCell>{transaction.invoiceNumber}</TableCell>
-                        <TableCell>{transaction.tableNumber || '-'}</TableCell>
-                        <TableCell>{transaction.server}</TableCell>
-                        <TableCell>{transaction.operator}</TableCell>
-                        <TableCell>{formatCurrency(transaction.totalFood)}</TableCell>
-                        <TableCell>{formatCurrency(transaction.totalDrinks)}</TableCell>
-                        <TableCell>{formatCurrency(transaction.totalOther)}</TableCell>
-                        <TableCell className="font-medium">{formatCurrency(transaction.totalAmount)}</TableCell>
-                        <TableCell>
-                          {transaction.paymentMethod === 'card' && 'Carte bancaire'}
-                          {transaction.paymentMethod === 'cash' && 'Espèces'}
-                          {transaction.paymentMethod === 'room_transfer' && 'Transfer chambre'}
-                          {transaction.paymentMethod === 'free' && 'Gratuité'}
-                          {transaction.paymentMethod === 'other' && 'Autre'}
-                        </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={9} className="text-center py-4 text-gray-500">
-                        Aucune transaction disponible pour aujourd'hui.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+            <MainCourtReport 
+              transactions={transactions} 
+              startDate={new Date()}
+              endDate={new Date()}
+              printRef={mainCourtReportRef}
+            />
           </CardContent>
         </Card>
       )}

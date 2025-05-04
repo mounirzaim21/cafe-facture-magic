@@ -8,16 +8,18 @@ interface SalesStatisticsCardProps {
   value: number;
   icon: ReactNode;
   isCurrency?: boolean;
+  className?: string;
 }
 
 const SalesStatisticsCard: React.FC<SalesStatisticsCardProps> = ({
   title,
   value,
   icon,
-  isCurrency = false
+  isCurrency = false,
+  className = ''
 }) => {
   return (
-    <Card>
+    <Card className={className}>
       <CardContent className="p-6">
         <div className="flex items-center justify-between mb-2">
           <h3 className="text-sm font-medium text-muted-foreground">{title}</h3>

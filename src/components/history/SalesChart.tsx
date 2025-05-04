@@ -2,6 +2,7 @@
 import React, { useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Order } from '@/types';
+import { formatCurrency } from '@/lib/utils';
 
 interface SalesChartProps {
   orders: Order[];
@@ -16,7 +17,8 @@ const SalesChart: React.FC<SalesChartProps> = ({ orders }) => {
     const sortedOrders = [...orders].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     
     sortedOrders.forEach(order => {
-      const dateStr = new Date(order.date).toLocaleDateString('fr-FR');
+      const orderDate = new Date(order.date);
+      const dateStr = orderDate.toLocaleDateString('fr-FR');
       
       if (!dataMap.has(dateStr)) {
         dataMap.set(dateStr, { date: dateStr, value: 0, count: 0 });
@@ -53,7 +55,7 @@ const SalesChart: React.FC<SalesChartProps> = ({ orders }) => {
             tick={{ fontSize: 11 }}
           />
           <Tooltip 
-            formatter={(value: number) => [`${value.toFixed(2)} €`, 'Chiffre d\'affaires']}
+            formatter={(value: number) => [formatCurrency(value), 'Chiffre d\'affaires']}
             labelFormatter={(label) => `Date: ${label}`}
           />
           <Area 
