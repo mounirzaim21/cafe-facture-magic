@@ -1,5 +1,6 @@
 
 import { Order } from "@/types";
+import { ordersStore, archivedOrders } from './reportService';
 
 // Clé utilisée pour stocker l'historique des ventes dans localStorage
 const SALES_HISTORY_KEY = "salesHistory";
@@ -166,9 +167,8 @@ export const addOrderToHistory = (order: Order): void => {
 export const syncOrdersWithHistory = (): void => {
   // Cette fonction sera appelée lors de l'initialisation de l'application
   // pour synchroniser les ordres dans reportService avec l'historique
-  const { archivedOrders, ordersStore } = require('./reportService');
   
-  if (!archivedOrders || !ordersStore) return;
+  if (!ordersStore || !archivedOrders) return;
   
   // Combiner les commandes actuelles et archivées
   const allOrders = [...ordersStore, ...archivedOrders];
@@ -194,3 +194,4 @@ export const syncOrdersWithHistory = (): void => {
   // Sauvegarder l'historique fusionné
   saveSalesHistory(mergedOrders);
 };
+
