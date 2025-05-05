@@ -15,7 +15,9 @@ export default defineConfig(({ mode }) => ({
     },
   },
   server: {
-    port: 8080
+    port: 8080,
+    host: true, // Expose sur toutes les interfaces réseau
+    strictPort: true, // Ne pas chercher un autre port si 8080 est occupé
   },
   base: '/',
   build: {
