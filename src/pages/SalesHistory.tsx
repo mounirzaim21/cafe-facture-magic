@@ -7,7 +7,7 @@ import {
   Download, 
   Search, 
   Printer,
-  FileExcel 
+  FileSpreadsheet
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -341,7 +341,7 @@ const SalesHistory: React.FC = () => {
             disabled={filteredOrders.length === 0}
             variant="outline"
           >
-            <FileExcel className="mr-2 h-4 w-4" />
+            <FileSpreadsheet className="mr-2 h-4 w-4" />
             Exporter Excel
           </Button>
           <Button
