@@ -74,7 +74,12 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
 
           <InvoiceItems items={items} />
           
-          <InvoiceSummary items={items} paymentMethod={paymentMethod} />
+          <InvoiceSummary 
+            items={items} 
+            paymentMethod={paymentMethod} 
+            invoiceRef={invoiceRef}
+            orderId={orderId}
+          />
 
           <InvoiceFooter footerText={footerText} />
         </div>

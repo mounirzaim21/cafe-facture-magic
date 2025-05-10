@@ -7,7 +7,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { formatCurrency } from '@/lib/utils';
-import { Save, Check, CreditCard, Euro, DoorOpen, FileText, Edit } from 'lucide-react';
+import { Save, Check, CreditCard, Euro, DoorOpen, FileText } from 'lucide-react';
 import ManagerPasswordModal from './ManagerPasswordModal';
 
 interface CheckoutModalProps {
@@ -52,10 +52,6 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
       roomNumber || undefined,
       true // completing the order
     );
-  };
-
-  const handleRequestModifyCart = () => {
-    setIsManagerModalOpen(true);
   };
 
   const handleManagerConfirm = () => {
@@ -157,14 +153,6 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
           <DialogFooter className="flex flex-wrap gap-2">
             <Button variant="outline" onClick={onClose}>
               Annuler
-            </Button>
-            <Button 
-              onClick={handleRequestModifyCart} 
-              variant="outline" 
-              className="bg-amber-600 text-white hover:bg-amber-700"
-            >
-              <Edit className="mr-2 h-4 w-4" />
-              Modifier
             </Button>
             <Button onClick={handleSave} variant="secondary" className="bg-blue-600 text-white hover:bg-blue-700">
               <Save className="mr-2 h-4 w-4" />

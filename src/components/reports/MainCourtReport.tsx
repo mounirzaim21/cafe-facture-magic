@@ -93,8 +93,7 @@ const MainCourtReport: React.FC<MainCourtReportProps> = ({
         <div className="text-sm mt-2">
           <div>HÔTEL FESTIN</div>
           <div>Date d'édition: {currentDate}</div>
-          <div>Point de Vente: BAR LE PLAZA</div>
-          <div>Service: SOIR</div>
+          <div>Point de Vente: SNACK FES INN</div>
         </div>
       </CardHeader>
       <CardContent className="pt-6">

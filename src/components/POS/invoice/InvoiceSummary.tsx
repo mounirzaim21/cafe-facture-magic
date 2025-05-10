@@ -1,16 +1,19 @@
 
-import React from 'react';
+import React, { useRef } from 'react';
 import { CartItem, PaymentMethod } from '@/types';
 import { formatCurrency } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Printer } from 'lucide-react';
+import PrintHandler from './PrintHandler';
 
 interface InvoiceSummaryProps {
   items: CartItem[];
   paymentMethod: PaymentMethod;
+  invoiceRef: React.RefObject<HTMLDivElement>;
+  orderId: string;
 }
 
-const InvoiceSummary: React.FC<InvoiceSummaryProps> = ({ items, paymentMethod }) => {
+const InvoiceSummary: React.FC<InvoiceSummaryProps> = ({ items, paymentMethod, invoiceRef, orderId }) => {
   const calculateSubtotal = (): number => {
     return items.reduce((total, item) => total + item.product.price * item.quantity, 0);
   };
@@ -38,6 +41,9 @@ const InvoiceSummary: React.FC<InvoiceSummaryProps> = ({ items, paymentMethod })
     }
   };
 
+  // Get the print handler function
+  const printInvoiceHandler = PrintHandler({ content: invoiceRef, orderId });
+
   return (
     <div className="mt-4 pt-2 border-t border-dashed space-y-1">
       <div className="flex justify-between text-sm">
@@ -57,7 +63,7 @@ const InvoiceSummary: React.FC<InvoiceSummaryProps> = ({ items, paymentMethod })
         <span>{getPaymentMethodName(paymentMethod)}</span>
       </div>
       <div className="mt-4">
-        <Button variant="outline" className="w-full">
+        <Button variant="outline" className="w-full" onClick={printInvoiceHandler}>
           <Printer className="mr-2 h-4 w-4" />
           Imprimer facture
         </Button>

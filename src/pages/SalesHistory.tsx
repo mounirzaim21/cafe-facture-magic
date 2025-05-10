@@ -6,7 +6,8 @@ import {
   Calendar, 
   Download, 
   Search, 
-  Printer 
+  Printer,
+  FileExcel 
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -29,6 +30,7 @@ import {
   calculateSalesStatistics,
   syncOrdersWithHistory
 } from '@/services/historyService';
+import { utils, writeFile } from 'xlsx';
 import SalesStatisticsCard from '@/components/history/SalesStatisticsCard';
 import SalesChart from '@/components/history/SalesChart';
 import HistoryFilters from '@/components/history/HistoryFilters';
@@ -125,6 +127,74 @@ const SalesHistory: React.FC = () => {
       toast({
         title: "Erreur",
         description: "Une erreur est survenue lors de l'export.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleExportExcel = () => {
+    try {
+      if (filteredOrders.length === 0) {
+        toast({
+          title: "Export impossible",
+          description: "Aucune donnée à exporter.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Créer les données pour l'export Excel
+      const statistics = calculateSalesStatistics(filteredOrders);
+      
+      // Créer le livre Excel
+      const wb = utils.book_new();
+      
+      // Créer la feuille des commandes
+      const ordersData = filteredOrders.map(order => ({
+        'Date': new Date(order.date).toLocaleDateString('fr-FR'),
+        'Numéro de facture': order.id,
+        'Articles': order.items.map(item => item.product.name).join(', '),
+        'Quantités': order.items.map(item => item.quantity).join(', '),
+        'Mode de paiement': order.paymentMethod === 'card' ? 'Carte bancaire' : 
+                          order.paymentMethod === 'cash' ? 'Espèces' : 
+                          order.paymentMethod === 'room_transfer' ? 'Transfer chambre' :
+                          order.paymentMethod === 'free' ? 'Gratuité' : 'Autre',
+        'Montant total': order.total
+      }));
+      const ordersSheet = utils.json_to_sheet(ordersData);
+      utils.book_append_sheet(wb, ordersSheet, 'Commandes');
+      
+      // Créer la feuille des statistiques
+      const statsData = statistics.productQuantities.map(item => ({
+        'Produit': item.name,
+        'Quantité vendue': item.quantity,
+        'Montant total': item.total
+      }));
+      const statsSheet = utils.json_to_sheet(statsData);
+      utils.book_append_sheet(wb, statsSheet, 'Statistiques');
+      
+      // Créer une feuille résumé
+      const summaryData = [
+        { 'Métrique': 'Période', 'Valeur': `${new Date(startDate).toLocaleDateString('fr-FR')} au ${new Date(endDate).toLocaleDateString('fr-FR')}` },
+        { 'Métrique': 'Nombre total de commandes', 'Valeur': statistics.orderCount },
+        { 'Métrique': 'Chiffre d\'affaires total', 'Valeur': statistics.totalRevenue },
+        { 'Métrique': 'Panier moyen', 'Valeur': statistics.orderCount > 0 ? statistics.totalRevenue / statistics.orderCount : 0 }
+      ];
+      const summarySheet = utils.json_to_sheet(summaryData);
+      utils.book_append_sheet(wb, summarySheet, 'Résumé');
+      
+      // Télécharger le fichier Excel
+      writeFile(wb, `historique-ventes-${startDate}-${endDate}.xlsx`);
+      
+      toast({
+        title: "Export Excel réussi",
+        description: "L'historique des ventes a été exporté en format Excel avec succès.",
+      });
+    } catch (error) {
+      console.error("Erreur lors de l'export Excel:", error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur est survenue lors de l'export Excel.",
         variant: "destructive",
       });
     }
@@ -266,6 +336,14 @@ const SalesHistory: React.FC = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Historique des Ventes</h1>
         <div className="space-x-2">
+          <Button
+            onClick={handleExportExcel}
+            disabled={filteredOrders.length === 0}
+            variant="outline"
+          >
+            <FileExcel className="mr-2 h-4 w-4" />
+            Exporter Excel
+          </Button>
           <Button
             onClick={handleExportCSV}
             disabled={filteredOrders.length === 0}
