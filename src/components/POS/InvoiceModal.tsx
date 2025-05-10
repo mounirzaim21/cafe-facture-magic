@@ -85,7 +85,7 @@ const InvoiceModal: React.FC<InvoiceModalProps> = ({
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={() => printInvoiceHandler()} className="mr-2">
+          <Button variant="outline" onClick={printInvoiceHandler} className="mr-2 bg-blue-100 hover:bg-blue-200">
             <Printer className="mr-2 h-4 w-4" />
             Imprimer
           </Button>

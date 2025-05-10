@@ -1,5 +1,5 @@
 
-import React, { useRef } from 'react';
+import React from 'react';
 import { CartItem, PaymentMethod } from '@/types';
 import { formatCurrency } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -63,7 +63,11 @@ const InvoiceSummary: React.FC<InvoiceSummaryProps> = ({ items, paymentMethod, i
         <span>{getPaymentMethodName(paymentMethod)}</span>
       </div>
       <div className="mt-4">
-        <Button variant="outline" className="w-full" onClick={printInvoiceHandler}>
+        <Button 
+          variant="outline" 
+          className="w-full bg-blue-100 hover:bg-blue-200" 
+          onClick={printInvoiceHandler}
+        >
           <Printer className="mr-2 h-4 w-4" />
           Imprimer facture
         </Button>
