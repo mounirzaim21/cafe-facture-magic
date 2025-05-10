@@ -2,6 +2,8 @@
 import React from 'react';
 import { CartItem, PaymentMethod } from '@/types';
 import { formatCurrency } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Printer } from 'lucide-react';
 
 interface InvoiceSummaryProps {
   items: CartItem[];
@@ -53,6 +55,12 @@ const InvoiceSummary: React.FC<InvoiceSummaryProps> = ({ items, paymentMethod })
       <div className="flex justify-between text-sm pt-2">
         <span>Méthode de paiement:</span>
         <span>{getPaymentMethodName(paymentMethod)}</span>
+      </div>
+      <div className="mt-4">
+        <Button variant="outline" className="w-full">
+          <Printer className="mr-2 h-4 w-4" />
+          Imprimer facture
+        </Button>
       </div>
     </div>
   );
