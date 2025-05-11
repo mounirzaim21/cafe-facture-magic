@@ -29,14 +29,16 @@ export const useInvoices = () => {
   }, [invoices]);
 
   const handleNewInvoice = () => {
-    const newInvoiceNumber = Math.max(0, ...invoices.map(inv => inv.number)) + 1;
+    // Make sure to use string for invoice number
+    const newInvoiceNumber = Math.max(0, ...invoices.map(inv => Number(inv.number) || 0)) + 1;
     const newInvoice: Invoice = {
       id: uuidv4(),
-      number: newInvoiceNumber,
-      date: new Date().toISOString(),
+      number: String(newInvoiceNumber),
       items: [],
       status: 'draft',
       isLocked: false,
+      createdAt: new Date(),
+      total: 0
     };
     
     setInvoices(prevInvoices => [...prevInvoices, newInvoice]);
@@ -131,7 +133,7 @@ export const useInvoices = () => {
         paymentMethod,
         tableNumber,
         roomNumber,
-        completedAt: new Date().toISOString(),
+        completedAt: new Date(),
       };
       
       // Update the invoice in state
@@ -144,7 +146,7 @@ export const useInvoices = () => {
       // Set the current order for display in the invoice modal
       setCurrentOrder(completedInvoice);
       
-      // Save to history
+      // Save to history - passing the single completedInvoice correctly
       saveSalesHistory(completedInvoice);
       
       // Create a new invoice for the next order

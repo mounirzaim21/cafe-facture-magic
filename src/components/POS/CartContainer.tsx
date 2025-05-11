@@ -18,7 +18,8 @@ const CartContainer = () => {
     handleUpdateQuantity,
     handleCompleteOrder,
     lockInvoice,
-    unlockInvoice
+    unlockInvoice,
+    updateInvoiceDetails
   } = useInvoices();
 
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState<boolean>(false);
@@ -117,9 +118,8 @@ const CartContainer = () => {
     } else {
       const currentInvoice = getCurrentInvoice();
       if (currentInvoice) {
-        // This part uses the setInvoices function which we need to import
-        // We'll handle this by modifying the useInvoices hook to expose what we need
-        handleUpdateInvoiceDetails(currentInvoice.id, paymentMethod, tableNumber, roomNumber);
+        // This part uses the updateInvoiceDetails function
+        updateInvoiceDetails(currentInvoice.id, paymentMethod, tableNumber, roomNumber);
         setIsCheckoutModalOpen(false);
         
         toast({
@@ -128,30 +128,6 @@ const CartContainer = () => {
         });
       }
     }
-  };
-
-  const handleUpdateInvoiceDetails = (
-    invoiceId: string,
-    paymentMethod: PaymentMethod,
-    tableNumber?: number,
-    roomNumber?: string
-  ) => {
-    // Get the current invoice and update its details
-    const currentInvoice = getCurrentInvoice();
-    if (currentInvoice && currentInvoice.id === invoiceId) {
-      // This would be implemented in useInvoices to update specific invoice details
-      updateInvoiceDetails(invoiceId, paymentMethod, tableNumber, roomNumber);
-    }
-  };
-
-  const updateInvoiceDetails = (
-    invoiceId: string,
-    paymentMethod: PaymentMethod,
-    tableNumber?: number,
-    roomNumber?: string
-  ) => {
-    // This is a placeholder for the function that would be exposed by useInvoices
-    // In this refactoring, we'll add this function to the useInvoices hook
   };
 
   const handleInvoiceClose = () => {
@@ -187,7 +163,7 @@ const CartContainer = () => {
           onClose={handleInvoiceClose}
           items={currentOrder.items}
           paymentMethod={currentOrder.paymentMethod}
-          date={currentOrder.date}
+          date={currentOrder.createdAt} // Using createdAt instead of date
           orderId={currentOrder.id}
           tableNumber={currentOrder.tableNumber}
           roomNumber={currentOrder.roomNumber}
