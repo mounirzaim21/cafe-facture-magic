@@ -1,52 +1,73 @@
 
 import { useState, useEffect } from 'react';
-import { Invoice, CartItem, PaymentMethod, Order, Product } from '@/types';
-import { addOrder } from '@/services/reportService';
-import { addOrderToHistory } from '@/services/historyService';
-import { createNewInvoice, createOrderFromInvoice } from '@/utils/invoiceUtils';
-import { loadInvoicesFromStorage, saveInvoicesToStorage } from '@/services/invoiceStorageService';
-import { addProductToInvoice, updateItemQuantity, completeInvoice, toggleInvoiceLock } from '@/services/invoiceOperations';
+import { v4 as uuidv4 } from 'uuid';
+import { Invoice, CartItem, Product, PaymentMethod, InvoiceStatus } from '@/types';
+import { getSavedInvoices, saveInvoices } from '@/services/invoiceStorageService';
+import { saveSalesHistory } from '@/services/historyService';
 
 export const useInvoices = () => {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [activeInvoiceId, setActiveInvoiceId] = useState<string | null>(null);
-  const [currentOrder, setCurrentOrder] = useState<Order | null>(null);
-  
-  // Load invoices from localStorage on initial render
+  const [currentOrder, setCurrentOrder] = useState<Invoice | null>(null);
+
+  // Load invoices from localStorage on component mount
   useEffect(() => {
-    const { invoices: loadedInvoices, activeInvoiceId: loadedActiveId } = loadInvoicesFromStorage();
-    setInvoices(loadedInvoices);
-    
-    if (loadedActiveId) {
-      setActiveInvoiceId(loadedActiveId);
+    const savedInvoices = getSavedInvoices();
+    if (savedInvoices.length > 0) {
+      setInvoices(savedInvoices);
+      console.info(`Loaded saved invoices: ${savedInvoices.length}`);
+    } else {
+      handleNewInvoice(); // Create a new invoice if none exist
     }
   }, []);
-  
+
   // Save invoices to localStorage whenever they change
   useEffect(() => {
-    saveInvoicesToStorage(invoices, activeInvoiceId);
-  }, [invoices, activeInvoiceId]);
-
-  const getCurrentInvoice = (): Invoice | undefined => {
-    return invoices.find(inv => inv.id === activeInvoiceId);
-  };
+    if (invoices.length > 0) {
+      saveInvoices(invoices);
+    }
+  }, [invoices]);
 
   const handleNewInvoice = () => {
-    const newInvoice = createNewInvoice(invoices.length);
-    setInvoices([...invoices, newInvoice]);
+    const newInvoiceNumber = Math.max(0, ...invoices.map(inv => inv.number)) + 1;
+    const newInvoice: Invoice = {
+      id: uuidv4(),
+      number: newInvoiceNumber,
+      date: new Date().toISOString(),
+      items: [],
+      status: 'draft',
+      isLocked: false,
+    };
+    
+    setInvoices(prevInvoices => [...prevInvoices, newInvoice]);
     setActiveInvoiceId(newInvoice.id);
   };
 
-  const handleAddToCart = (product: Product) => {
-    if (!activeInvoiceId) {
-      handleNewInvoice();
-      return;
-    }
+  const getCurrentInvoice = (): Invoice | undefined => {
+    return invoices.find(invoice => invoice.id === activeInvoiceId);
+  };
 
+  const handleAddToCart = (product: Product) => {
     setInvoices(prevInvoices => {
       return prevInvoices.map(invoice => {
         if (invoice.id === activeInvoiceId) {
-          return addProductToInvoice(invoice, product);
+          const existingItem = invoice.items.find(item => item.product.id === product.id);
+          
+          if (existingItem) {
+            return {
+              ...invoice,
+              items: invoice.items.map(item => 
+                item.product.id === product.id 
+                  ? { ...item, quantity: item.quantity + 1 }
+                  : item
+              ),
+            };
+          } else {
+            return {
+              ...invoice,
+              items: [...invoice.items, { product, quantity: 1 }],
+            };
+          }
         }
         return invoice;
       });
@@ -54,84 +75,117 @@ export const useInvoices = () => {
   };
 
   const handleUpdateQuantity = (item: CartItem, newQuantity: number) => {
-    if (!activeInvoiceId) return;
-
     setInvoices(prevInvoices => {
       return prevInvoices.map(invoice => {
         if (invoice.id === activeInvoiceId) {
-          return updateItemQuantity(invoice, item, newQuantity);
+          if (newQuantity <= 0) {
+            // Remove item if quantity is 0 or less
+            return {
+              ...invoice,
+              items: invoice.items.filter(i => i.product.id !== item.product.id),
+            };
+          } else {
+            // Update quantity if greater than 0
+            return {
+              ...invoice,
+              items: invoice.items.map(i => 
+                i.product.id === item.product.id 
+                  ? { ...i, quantity: newQuantity }
+                  : i
+              ),
+            };
+          }
         }
         return invoice;
       });
     });
   };
 
-  const lockInvoice = (invoiceId: string) => {
-    setInvoices(prevInvoices => 
-      prevInvoices.map(inv => 
-        inv.id === invoiceId ? toggleInvoiceLock(inv, true) : inv
-      )
-    );
-  };
-
-  const unlockInvoice = (invoiceId: string) => {
-    setInvoices(prevInvoices => 
-      prevInvoices.map(inv => 
-        inv.id === invoiceId ? toggleInvoiceLock(inv, false) : inv
+  const updateInvoiceDetails = (
+    invoiceId: string,
+    paymentMethod: PaymentMethod,
+    tableNumber?: number,
+    roomNumber?: string
+  ) => {
+    setInvoices(prevInvoices =>
+      prevInvoices.map(inv =>
+        inv.id === invoiceId
+          ? {
+              ...inv,
+              paymentMethod,
+              tableNumber,
+              roomNumber
+            }
+          : inv
       )
     );
   };
 
   const handleCompleteOrder = (paymentMethod: PaymentMethod, tableNumber?: number, roomNumber?: string) => {
-    if (!activeInvoiceId) return;
-
-    const invoice = getCurrentInvoice();
-    if (!invoice) return;
-
-    // Create order object from invoice
-    const newOrder = createOrderFromInvoice(invoice, paymentMethod, tableNumber, roomNumber);
-
-    // Add the order to our central store and history
-    const addedOrder = addOrder(newOrder);
-    addOrderToHistory(newOrder);
+    const currentInvoice = getCurrentInvoice();
     
-    console.log("Order added successfully:", addedOrder);
+    if (currentInvoice) {
+      const completedInvoice: Invoice = {
+        ...currentInvoice,
+        status: 'completed',
+        paymentMethod,
+        tableNumber,
+        roomNumber,
+        completedAt: new Date().toISOString(),
+      };
+      
+      // Update the invoice in state
+      setInvoices(prevInvoices => 
+        prevInvoices.map(inv => 
+          inv.id === currentInvoice.id ? completedInvoice : inv
+        )
+      );
+      
+      // Set the current order for display in the invoice modal
+      setCurrentOrder(completedInvoice);
+      
+      // Save to history
+      saveSalesHistory(completedInvoice);
+      
+      // Create a new invoice for the next order
+      handleNewInvoice();
+    }
+  };
 
-    // Trigger a custom event to notify components to refresh their data
-    const refreshEvent = new CustomEvent('orderCompleted', { detail: addedOrder });
-    window.dispatchEvent(refreshEvent);
-
-    // Update invoice status to completed
+  const lockInvoice = (invoiceId: string) => {
     setInvoices(prevInvoices =>
       prevInvoices.map(inv =>
-        inv.id === activeInvoiceId
-          ? completeInvoice(inv, paymentMethod, tableNumber, roomNumber)
+        inv.id === invoiceId
+          ? { ...inv, isLocked: true }
           : inv
       )
     );
-
-    setCurrentOrder(newOrder);
   };
 
-  const areAllInvoicesCompleted = (): boolean => {
-    // Check if all invoices are completed
-    return invoices.every(invoice => invoice.status === 'completed');
+  const unlockInvoice = (invoiceId: string) => {
+    setInvoices(prevInvoices =>
+      prevInvoices.map(inv =>
+        inv.id === invoiceId
+          ? { ...inv, isLocked: false }
+          : inv
+      )
+    );
   };
 
   return {
     invoices,
     setInvoices,
     activeInvoiceId,
-    currentOrder,
     setActiveInvoiceId,
+    currentOrder,
     setCurrentOrder,
     getCurrentInvoice,
     handleNewInvoice,
     handleAddToCart,
     handleUpdateQuantity,
+    updateInvoiceDetails,
     handleCompleteOrder,
     lockInvoice,
     unlockInvoice,
-    areAllInvoicesCompleted
   };
 };
