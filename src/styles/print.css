@@ -7,6 +7,7 @@
     padding: 0;
     background-color: white;
     font-family: Arial, sans-serif;
+    width: 100%;
   }
   
   /* Cache les éléments qui ne doivent pas être imprimés */
@@ -52,5 +53,12 @@
     text-align: center;
     margin-top: 10mm;
     font-size: 10px;
+  }
+
+  /* Assurer que le contenu d'impression est visible */
+  .print-content {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 }

@@ -256,22 +256,34 @@ const CheckoutModal: React.FC<CheckoutModalProps> = ({
             </div>
           </div>
 
-          <DialogFooter className="flex flex-wrap gap-2">
-            <Button variant="outline" onClick={onClose}>
-              Annuler
-            </Button>
-            <Button onClick={handlePrint} variant="outline" className="bg-blue-100 hover:bg-blue-200">
-              <Printer className="mr-2 h-4 w-4" />
-              Imprimer
-            </Button>
-            <Button onClick={handleSave} variant="secondary" className="bg-blue-600 text-white hover:bg-blue-700">
-              <Save className="mr-2 h-4 w-4" />
-              Enregistrer
-            </Button>
-            <Button onClick={handleValidate} className="bg-green-600 hover:bg-green-700">
-              <Check className="mr-2 h-4 w-4" />
-              Valider
-            </Button>
+          <DialogFooter className="flex flex-col sm:flex-row justify-between gap-2">
+            <div className="flex space-x-2">
+              <Button variant="outline" onClick={onClose}>
+                Annuler
+              </Button>
+              <Button 
+                onClick={handlePrint} 
+                variant="outline" 
+                className="bg-blue-100 hover:bg-blue-200 flex items-center"
+              >
+                <Printer className="mr-2 h-4 w-4" />
+                Imprimer
+              </Button>
+            </div>
+            <div className="flex space-x-2 mt-2 sm:mt-0">
+              <Button 
+                onClick={handleSave} 
+                variant="secondary" 
+                className="bg-blue-600 text-white hover:bg-blue-700"
+              >
+                <Save className="mr-2 h-4 w-4" />
+                Enregistrer
+              </Button>
+              <Button onClick={handleValidate} className="bg-green-600 hover:bg-green-700">
+                <Check className="mr-2 h-4 w-4" />
+                Valider
+              </Button>
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>
