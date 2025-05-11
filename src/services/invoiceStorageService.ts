@@ -44,7 +44,7 @@ export const saveInvoicesToStorage = (invoices: Invoice[], activeInvoiceId: stri
   }
 };
 
-// Alias functions to match what's being imported in useInvoices.ts
+// Export aliases for functions used in useInvoices.ts
 export const getSavedInvoices = (): Invoice[] => {
   return loadInvoicesFromStorage().invoices;
 };

@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { Invoice, CartItem, Product, PaymentMethod, InvoiceStatus } from '@/types';
+import { Invoice, CartItem, Product, PaymentMethod, InvoiceStatus, Order } from '@/types';
 import { getSavedInvoices, saveInvoices } from '@/services/invoiceStorageService';
 import { saveSalesHistory } from '@/services/historyService';
 
@@ -29,11 +28,13 @@ export const useInvoices = () => {
   }, [invoices]);
 
   const handleNewInvoice = () => {
-    // Make sure to use string for invoice number
-    const newInvoiceNumber = Math.max(0, ...invoices.map(inv => Number(inv.number) || 0)) + 1;
+    // Find the max invoice number and increment it
+    const maxInvoiceNumber = Math.max(0, ...invoices.map(inv => Number(inv.number) || 0));
+    const newInvoiceNumber = maxInvoiceNumber + 1;
+    
     const newInvoice: Invoice = {
       id: uuidv4(),
-      number: String(newInvoiceNumber),
+      number: String(newInvoiceNumber), // Convert to string to match Invoice type
       items: [],
       status: 'draft',
       isLocked: false,
@@ -147,7 +148,7 @@ export const useInvoices = () => {
       setCurrentOrder(completedInvoice);
       
       // Convert Invoice to Order format for saveSalesHistory
-      const orderForHistory = {
+      const orderForHistory: Order = {
         id: completedInvoice.id,
         items: completedInvoice.items,
         total: completedInvoice.total,
@@ -158,7 +159,7 @@ export const useInvoices = () => {
         completed: true
       };
       
-      // Save to history - passing a single order as an array
+      // Save to history - passing it as an array as required by the function
       saveSalesHistory([orderForHistory]);
       
       // Create a new invoice for the next order
