@@ -146,8 +146,20 @@ export const useInvoices = () => {
       // Set the current order for display in the invoice modal
       setCurrentOrder(completedInvoice);
       
-      // Save to history - passing the single completedInvoice correctly
-      saveSalesHistory(completedInvoice);
+      // Convert Invoice to Order format for saveSalesHistory
+      const orderForHistory = {
+        id: completedInvoice.id,
+        items: completedInvoice.items,
+        total: completedInvoice.total,
+        paymentMethod: completedInvoice.paymentMethod || 'cash',
+        date: completedInvoice.createdAt,
+        tableNumber: completedInvoice.tableNumber,
+        roomNumber: completedInvoice.roomNumber,
+        completed: true
+      };
+      
+      // Save to history - passing a single order as an array
+      saveSalesHistory([orderForHistory]);
       
       // Create a new invoice for the next order
       handleNewInvoice();
