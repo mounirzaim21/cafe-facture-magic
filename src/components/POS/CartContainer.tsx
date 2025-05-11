@@ -1,12 +1,11 @@
-
 import React, { useState } from 'react';
 import { useInvoices } from '@/hooks/useInvoices';
 import Cart from '@/components/POS/Cart';
-import CheckoutModal from '@/components/POS/CheckoutModal';
-import InvoiceModal from '@/components/POS/InvoiceModal';
-import ManagerPasswordModal from '@/components/POS/ManagerPasswordModal';
 import { PaymentMethod, CartItem } from '@/types';
 import { useToast } from '@/hooks/use-toast';
+import CartActionManager from './modals/CartActionManager';
+import CheckoutModalWrapper from './modals/CheckoutModalWrapper';
+import InvoiceDisplayModal from './modals/InvoiceDisplayModal';
 
 const CartContainer = () => {
   const {
@@ -24,13 +23,9 @@ const CartContainer = () => {
 
   const [isCheckoutModalOpen, setIsCheckoutModalOpen] = useState<boolean>(false);
   const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState<boolean>(false);
-  const [isManagerModalOpen, setIsManagerModalOpen] = useState<boolean>(false);
-  const [pendingAction, setPendingAction] = useState<{
-    type: 'update' | 'remove' | 'clear';
-    item?: CartItem;
-    quantity?: number;
-  } | null>(null);
   const { toast } = useToast();
+
+  const currentInvoice = getCurrentInvoice();
 
   const handleCheckout = () => {
     setIsCheckoutModalOpen(true);
@@ -40,8 +35,8 @@ const CartContainer = () => {
     const currentInvoice = getCurrentInvoice();
     
     if (currentInvoice?.isLocked) {
-      setPendingAction({ type: 'update', item, quantity: newQuantity });
-      setIsManagerModalOpen(true);
+      // Use the CartActionManager for this
+      return;
     } else {
       handleUpdateQuantity(item, newQuantity);
     }
@@ -51,8 +46,8 @@ const CartContainer = () => {
     const currentInvoice = getCurrentInvoice();
     
     if (currentInvoice?.isLocked) {
-      setPendingAction({ type: 'remove', item });
-      setIsManagerModalOpen(true);
+      // Use the CartActionManager for this
+      return;
     } else {
       handleUpdateQuantity(item, 0);
     }
@@ -62,50 +57,21 @@ const CartContainer = () => {
     const currentInvoice = getCurrentInvoice();
     
     if (currentInvoice?.isLocked) {
-      setPendingAction({ type: 'clear' });
-      setIsManagerModalOpen(true);
+      // Use the CartActionManager for this
+      return;
     } else {
       if (currentInvoice) {
         currentInvoice.items.forEach(item => handleUpdateQuantity(item, 0));
       }
     }
   };
-  
-  const handleManagerConfirm = () => {
-    if (pendingAction && activeInvoiceId) {
-      unlockInvoice(activeInvoiceId);
-      
-      switch (pendingAction.type) {
-        case 'update':
-          if (pendingAction.item && pendingAction.quantity !== undefined) {
-            handleUpdateQuantity(pendingAction.item, pendingAction.quantity);
-          }
-          break;
-        case 'remove':
-          if (pendingAction.item) {
-            handleUpdateQuantity(pendingAction.item, 0);
-          }
-          break;
-        case 'clear':
-          const currentInvoice = getCurrentInvoice();
-          if (currentInvoice) {
-            currentInvoice.items.forEach(item => handleUpdateQuantity(item, 0));
-          }
-          break;
-      }
-      
-      setTimeout(() => {
-        if (activeInvoiceId) {
-          lockInvoice(activeInvoiceId);
-        }
-      }, 100);
-    }
-    
-    setPendingAction(null);
-    setIsManagerModalOpen(false);
-  };
 
-  const handleCompleteCheckout = (paymentMethod: PaymentMethod, tableNumber?: number, roomNumber?: string, shouldComplete?: boolean) => {
+  const handleCompleteCheckout = (
+    paymentMethod: PaymentMethod, 
+    tableNumber?: number, 
+    roomNumber?: string, 
+    shouldComplete?: boolean
+  ) => {
     if (shouldComplete) {
       handleCompleteOrder(paymentMethod, tableNumber, roomNumber);
       setIsCheckoutModalOpen(false);
@@ -118,7 +84,6 @@ const CartContainer = () => {
     } else {
       const currentInvoice = getCurrentInvoice();
       if (currentInvoice) {
-        // This part uses the updateInvoiceDetails function
         updateInvoiceDetails(currentInvoice.id, paymentMethod, tableNumber, roomNumber);
         setIsCheckoutModalOpen(false);
         
@@ -136,8 +101,6 @@ const CartContainer = () => {
     setActiveInvoiceId(null);
   };
 
-  const currentInvoice = getCurrentInvoice();
-
   return (
     <>
       <Cart 
@@ -148,38 +111,25 @@ const CartContainer = () => {
         onCheckout={handleCheckout}
       />
 
-      {isCheckoutModalOpen && currentInvoice && (
-        <CheckoutModal 
-          isOpen={isCheckoutModalOpen} 
-          onClose={() => setIsCheckoutModalOpen(false)} 
-          onCompleteOrder={handleCompleteCheckout}
-          items={currentInvoice.items}
-        />
-      )}
+      <CartActionManager
+        onUpdateQuantity={handleUpdateQuantity}
+        onUnlockInvoice={unlockInvoice}
+        onLockInvoice={lockInvoice}
+        activeInvoiceId={activeInvoiceId}
+      />
 
-      {isInvoiceModalOpen && currentOrder && (
-        <InvoiceModal 
-          isOpen={isInvoiceModalOpen}
-          onClose={handleInvoiceClose}
-          items={currentOrder.items}
-          paymentMethod={currentOrder.paymentMethod}
-          date={currentOrder.createdAt} // Using createdAt instead of date
-          orderId={currentOrder.id}
-          tableNumber={currentOrder.tableNumber}
-          roomNumber={currentOrder.roomNumber}
-        />
-      )}
+      <CheckoutModalWrapper
+        isOpen={isCheckoutModalOpen}
+        onClose={() => setIsCheckoutModalOpen(false)}
+        currentInvoice={currentInvoice}
+        onCompleteCheckout={handleCompleteCheckout}
+      />
 
-      {isManagerModalOpen && (
-        <ManagerPasswordModal
-          isOpen={isManagerModalOpen}
-          onClose={() => {
-            setIsManagerModalOpen(false);
-            setPendingAction(null);
-          }}
-          onConfirm={handleManagerConfirm}
-        />
-      )}
+      <InvoiceDisplayModal
+        isOpen={isInvoiceModalOpen}
+        onClose={handleInvoiceClose}
+        currentOrder={currentOrder}
+      />
     </>
   );
 };
