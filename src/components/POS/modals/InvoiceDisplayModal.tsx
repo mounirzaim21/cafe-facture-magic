@@ -20,8 +20,8 @@ const InvoiceDisplayModal: React.FC<InvoiceDisplayModalProps> = ({
     <InvoiceModal 
       isOpen={isOpen}
       onClose={onClose}
-      items={currentOrder.items}
-      paymentMethod={currentOrder.paymentMethod}
+      items={currentOrder.items || []}
+      paymentMethod={currentOrder.paymentMethod || 'cash'}
       date={currentOrder.createdAt}
       orderId={currentOrder.id}
       tableNumber={currentOrder.tableNumber}

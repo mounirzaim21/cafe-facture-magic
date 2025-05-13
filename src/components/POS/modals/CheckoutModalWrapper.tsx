@@ -6,7 +6,7 @@ import { Invoice, PaymentMethod } from '@/types';
 interface CheckoutModalWrapperProps {
   isOpen: boolean;
   onClose: () => void;
-  currentInvoice: Invoice | null;
+  currentInvoice: Invoice | undefined;
   onCompleteCheckout: (
     paymentMethod: PaymentMethod, 
     tableNumber?: number, 

@@ -8,6 +8,7 @@ const Index = () => {
 
   // Ensure we restore the current invoice state from localStorage
   useEffect(() => {
+    // Initialize with first draft invoice if none is active
     if (invoices.length > 0 && !activeInvoiceId) {
       const draftInvoices = invoices.filter(inv => inv.status === 'draft');
       if (draftInvoices.length > 0) {

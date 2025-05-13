@@ -1,8 +1,10 @@
+
 import { useState, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Invoice, CartItem, Product, PaymentMethod, InvoiceStatus, Order } from '@/types';
-import { getSavedInvoices, saveInvoices } from '@/services/invoiceStorageService';
+import { getSavedInvoices, saveInvoices, loadInvoicesFromStorage, saveInvoicesToStorage } from '@/services/invoiceStorageService';
 import { saveSalesHistory } from '@/services/historyService';
+import { calculateInvoiceTotal } from '@/utils/invoiceUtils';
 
 export const useInvoices = () => {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -11,10 +13,14 @@ export const useInvoices = () => {
 
   // Load invoices from localStorage on component mount
   useEffect(() => {
-    const savedInvoices = getSavedInvoices();
+    const { invoices: savedInvoices, activeInvoiceId: savedActiveInvoiceId } = loadInvoicesFromStorage();
+    
     if (savedInvoices.length > 0) {
       setInvoices(savedInvoices);
-      console.info(`Loaded saved invoices: ${savedInvoices.length}`);
+      if (savedActiveInvoiceId) {
+        setActiveInvoiceId(savedActiveInvoiceId);
+      }
+      console.info(`Loaded ${savedInvoices.length} saved invoices`);
     } else {
       handleNewInvoice(); // Create a new invoice if none exist
     }
@@ -23,9 +29,9 @@ export const useInvoices = () => {
   // Save invoices to localStorage whenever they change
   useEffect(() => {
     if (invoices.length > 0) {
-      saveInvoices(invoices);
+      saveInvoicesToStorage(invoices, activeInvoiceId);
     }
-  }, [invoices]);
+  }, [invoices, activeInvoiceId]);
 
   const handleNewInvoice = () => {
     // Find the max invoice number and increment it
@@ -54,23 +60,28 @@ export const useInvoices = () => {
     setInvoices(prevInvoices => {
       return prevInvoices.map(invoice => {
         if (invoice.id === activeInvoiceId) {
+          if (invoice.isLocked) {
+            return invoice; // Don't modify locked invoices
+          }
+          
           const existingItem = invoice.items.find(item => item.product.id === product.id);
+          let updatedItems;
           
           if (existingItem) {
-            return {
-              ...invoice,
-              items: invoice.items.map(item => 
-                item.product.id === product.id 
-                  ? { ...item, quantity: item.quantity + 1 }
-                  : item
-              ),
-            };
+            updatedItems = invoice.items.map(item => 
+              item.product.id === product.id 
+                ? { ...item, quantity: item.quantity + 1 }
+                : item
+            );
           } else {
-            return {
-              ...invoice,
-              items: [...invoice.items, { product, quantity: 1 }],
-            };
+            updatedItems = [...invoice.items, { product, quantity: 1 }];
           }
+          
+          return {
+            ...invoice,
+            items: updatedItems,
+            total: calculateInvoiceTotal(updatedItems)
+          };
         }
         return invoice;
       });
@@ -81,23 +92,28 @@ export const useInvoices = () => {
     setInvoices(prevInvoices => {
       return prevInvoices.map(invoice => {
         if (invoice.id === activeInvoiceId) {
+          if (invoice.isLocked) {
+            return invoice; // Don't modify locked invoices
+          }
+          
+          let updatedItems;
           if (newQuantity <= 0) {
             // Remove item if quantity is 0 or less
-            return {
-              ...invoice,
-              items: invoice.items.filter(i => i.product.id !== item.product.id),
-            };
+            updatedItems = invoice.items.filter(i => i.product.id !== item.product.id);
           } else {
             // Update quantity if greater than 0
-            return {
-              ...invoice,
-              items: invoice.items.map(i => 
-                i.product.id === item.product.id 
-                  ? { ...i, quantity: newQuantity }
-                  : i
-              ),
-            };
+            updatedItems = invoice.items.map(i => 
+              i.product.id === item.product.id 
+                ? { ...i, quantity: newQuantity }
+                : i
+            );
           }
+          
+          return {
+            ...invoice,
+            items: updatedItems,
+            total: calculateInvoiceTotal(updatedItems)
+          };
         }
         return invoice;
       });
@@ -128,6 +144,12 @@ export const useInvoices = () => {
     const currentInvoice = getCurrentInvoice();
     
     if (currentInvoice) {
+      // Calculate total based on payment method
+      let totalAmount = calculateInvoiceTotal(currentInvoice.items);
+      if (paymentMethod === 'free') {
+        totalAmount = 0;
+      }
+      
       const completedInvoice: Invoice = {
         ...currentInvoice,
         status: 'completed',
@@ -135,6 +157,8 @@ export const useInvoices = () => {
         tableNumber,
         roomNumber,
         completedAt: new Date(),
+        total: totalAmount,
+        isLocked: true
       };
       
       // Update the invoice in state
@@ -151,11 +175,11 @@ export const useInvoices = () => {
       const orderForHistory: Order = {
         id: completedInvoice.id,
         items: completedInvoice.items,
-        total: completedInvoice.total,
-        paymentMethod: completedInvoice.paymentMethod || 'cash',
+        total: totalAmount,
+        paymentMethod: paymentMethod,
         date: completedInvoice.createdAt,
-        tableNumber: completedInvoice.tableNumber,
-        roomNumber: completedInvoice.roomNumber,
+        tableNumber: tableNumber,
+        roomNumber: roomNumber,
         completed: true
       };
       

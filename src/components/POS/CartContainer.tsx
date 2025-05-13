@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useInvoices } from '@/hooks/useInvoices';
 import Cart from '@/components/POS/Cart';
@@ -35,7 +36,7 @@ const CartContainer = () => {
     const currentInvoice = getCurrentInvoice();
     
     if (currentInvoice?.isLocked) {
-      // Use the CartActionManager for this
+      console.log("Invoice is locked, cannot update");
       return;
     } else {
       handleUpdateQuantity(item, newQuantity);
@@ -46,7 +47,7 @@ const CartContainer = () => {
     const currentInvoice = getCurrentInvoice();
     
     if (currentInvoice?.isLocked) {
-      // Use the CartActionManager for this
+      console.log("Invoice is locked, cannot remove item");
       return;
     } else {
       handleUpdateQuantity(item, 0);
@@ -57,7 +58,7 @@ const CartContainer = () => {
     const currentInvoice = getCurrentInvoice();
     
     if (currentInvoice?.isLocked) {
-      // Use the CartActionManager for this
+      console.log("Invoice is locked, cannot clear cart");
       return;
     } else {
       if (currentInvoice) {

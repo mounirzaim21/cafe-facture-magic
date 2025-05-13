@@ -41,6 +41,8 @@ export const saveInvoicesToStorage = (invoices: Invoice[], activeInvoiceId: stri
   localStorage.setItem('draftInvoices', JSON.stringify(invoices));
   if (activeInvoiceId) {
     localStorage.setItem('activeInvoiceId', activeInvoiceId);
+  } else {
+    localStorage.removeItem('activeInvoiceId');
   }
 };
 
